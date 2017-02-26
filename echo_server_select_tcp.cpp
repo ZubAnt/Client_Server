@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <unordered_set>
+#include <set>
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
@@ -52,7 +52,7 @@ int main(int argc, char **argv){
 
     int MasterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(MasterSocket < 0){ print_err_and_exit("Opening socket", __LINE__); }
-    std::unordered_set<int> SlaveSockets;
+    std::set<int> SlaveSockets;
 
     struct sockaddr_in SockAddr;
     init_server_sockaddr(&SockAddr, port);
