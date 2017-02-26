@@ -4,4 +4,4 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    ehco_server_tcp.c
+    echo_server_tcp.c
