@@ -10,7 +10,7 @@ AF_UNIX - для Unix-сокетов ( https://en.wikipedia.org/wiki/Unix_domain
 Тип (type) может быть следующий:<br />
 SOCK_STREAM - для TCP,<br />
 SOCK_DGRAM - для UDP.<br />
-Протокол (proto) приравниваем к нулю - автоматический выбор.<br />G
+Протокол (proto) приравниваем к нулю - автоматический выбор.<br />
 
 #bind(...)
 
