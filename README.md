@@ -2,7 +2,7 @@
 
 Создает сокет и возвращает дескриптор сокета.
 
-int socket(int domain, int type, int protocol);
+int socket(int domain, int type, int protocol);\n
 Домен (domain) может быть следующим:
 AF_INET - для IPv4,
 AF_INET6 - для IPv6,
