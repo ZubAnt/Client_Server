@@ -3,6 +3,8 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CFLAGS += -std=c++11
+
 SOURCES += \
 #    echo_server_tcp.c \
 #    client.c \

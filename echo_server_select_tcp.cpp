@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <set>
-#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 
@@ -40,6 +39,18 @@ static void init_server_sockaddr(struct sockaddr_in *server, int port_nomber)
     server->sin_port = htons(port_nomber);
 }
 
+static bool is_closing(const char *msg){
+
+    char msg_close[] = "close";
+    size_t len = strlen(msg_close);
+    for(size_t i = 0; i < len; ++i){
+        if(msg[i] != msg_close[i]){
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char **argv){
 
     if(argc != 2){ print_err_and_exit("No port provided", __LINE__); } // second arg must be port number
@@ -52,7 +63,9 @@ int main(int argc, char **argv){
 
     int MasterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(MasterSocket < 0){ print_err_and_exit("Opening socket", __LINE__); }
+
     std::set<int> SlaveSockets;
+    std::set<int> rm_SlaveSockets;
 
     struct sockaddr_in SockAddr;
     init_server_sockaddr(&SockAddr, port);
@@ -60,9 +73,10 @@ int main(int argc, char **argv){
     set_nonblock(MasterSocket);
     listen(MasterSocket, SOMAXCONN);
 
+    fd_set Set;
+
     while (true) {
 
-        fd_set Set;
         FD_ZERO(&Set);
         FD_SET(MasterSocket, &Set);
         for(auto &Iter:SlaveSockets){
@@ -73,30 +87,38 @@ int main(int argc, char **argv){
         int Max = std::max(MasterSocket, *std::max_element(SlaveSockets.begin(), SlaveSockets.end()));
         select(Max + 1, &Set, nullptr, nullptr, nullptr);
 
-        for(auto &Iter:SlaveSockets){
+        for(auto Iter = SlaveSockets.begin(); Iter != SlaveSockets.end(); ++Iter){
 
-            if(FD_ISSET(Iter, &Set)){
+            if(FD_ISSET(*Iter, &Set)){
 
                 bzero(buff, SizeBuff);
-                int n_recv = recv(Iter, buff, SizeBuff, MSG_NOSIGNAL);
+                int n_recv = recv(*Iter, buff, SizeBuff, MSG_NOSIGNAL);
+                printf("buff = %s, len = %zu, n_recv = %d\n", buff, strlen(buff), n_recv);
+
                 if(n_recv == 0 && errno != EAGAIN){
-                    shutdown(Iter, SHUT_RDWR);
-                    close(Iter);
-                    SlaveSockets.erase(Iter);
+                    shutdown(*Iter, SHUT_RDWR);
+                    close(*Iter);
+                    rm_SlaveSockets.insert(*Iter);
                 }
-                else{
+                else if(n_recv != 0){
 
-                    printf("buff = %s len = %d\n", buff, strlen(buff));
-                    if(!strcmp(buff, "close\n")){
+                    if(is_closing(buff)){
 
-                        printf("here\n");
-                        shutdown(Iter, SHUT_RDWR);
-                        close(Iter);
+                        printf("closing\n");
+                        shutdown(*Iter, SHUT_RDWR);
+                        close(*Iter);
+                        rm_SlaveSockets.insert(*Iter);
                     }
-                    else{ int n_send = send(Iter, buff, SizeBuff, MSG_NOSIGNAL); }
+                    else{send(*Iter, buff, n_recv, MSG_NOSIGNAL); }
                 }
             }
         }
+        for(auto Iter = rm_SlaveSockets.begin(); Iter != rm_SlaveSockets.end(); ++Iter){
+            SlaveSockets.erase(*Iter);
+        }
+        rm_SlaveSockets.clear();
+
+
         if(FD_ISSET(MasterSocket, &Set)){
 
             int newSocket = accept(MasterSocket, 0, 0);
