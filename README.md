@@ -1,4 +1,4 @@
-                                                    #socket(...)
+#socket(...)
 
 Создает сокет и возвращает дескриптор сокета.
 
@@ -12,7 +12,7 @@ SOCK_STREAM - для TCP,
 SOCK_DGRAM - для UDP.
 Протокол (proto) приравниваем к нулю - автоматический выбор.
 
-                                                    #bind(...)
+#bind(...)
 
 Осуществляет "привязку" IP-адреса и порта к серверному сокету (в том числе дейтаграмному).
 bind(int sockfd, struct sockaddr *addr, socklet_t addrlen);
@@ -47,7 +47,7 @@ strcpy(sa.sun_path, "/tmp/demo.sock"); // Путь до сокета.
 Третий параметр - размер структуры, которая был передана вторым параметром.
 Возвращает - 0 при успехе и -1 при ошибке.
 
-                                                    #listen(...)
+#listen(...)
 
 Переводит сокет в режим приема новых соединений (TCP). Параметра два:
 
@@ -55,31 +55,31 @@ int listen(int sockfd /* Дескриптор сокета */, int backlog);
 Параметр backlog - максимальное длина очереди ожидающих соединения. Предельное значение - SOMAXCONN.
 Возвращает - 0 при успехе и -1 при ошибке.
 
-accept(...)
+#accept(...)
 
 Принимает новое соединение и возвращает дескриптор на него.
 int accept(int sockfd /* Слушающий сокет */, struct sockaddr *addr, socklen_t *addrlen);
 
 Тут важно акцентировать внимание на параметрах addr и addrlen. Они могут быть NULL и NULL, а могут быть указателями, и тогда по addr станет доступна структура (например, sockaddr_in), описывающая клиента (в т.ч. его IP-адрес), а по addrlen будет доступна длина этой структуры.
 
-                                                    #connect(...)
+#connect(...)
 
 Противоположность accept. 
 int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
  
 Вызывается на клиентском сокете, запускает процесс соединения с сервером. Адрес сервера передается через addr и addrlen.
-                                                    #send(...)/recv(...)
+#send(...)/recv(...)
 
 ssize_t send(int sockfd, const void *buf, size_t len, int flags);
 ssize_t recv(int sockfd, void *buf, size_t len, int flags);
  
 Запись в сокет и чтение из сокета. Главное отличие от read/write (которые, кстати, тоже допустимы) - наличие флагов flags. Мы обычно заинтересованы в флаге MSG_NOSIGNAL, который подавляет сигнал SIGPIPE при попытке работы с разорванным соединением.
-shutdown(...)
+#shutdown(...)
 
 Разрываем соединение - на чтение или/и на запись.
 int shutdown(int sockfd, int how /* SHUT_RD, SHUT_WR, SHUT_RDWR */);﻿
  
-                                                    #sendto(...)/recvfrom(...)
+#sendto(...)/recvfrom(...)
 
 Это версии send/recv для UPD. Они содержат параметры ﻿addr и addrlen, необходимые для UDP (адрес получателя или отправителя).
 ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, ﻿const struct sockaddr *dest_addr, socklen_t addrlen);
