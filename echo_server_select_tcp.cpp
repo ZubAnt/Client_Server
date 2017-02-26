@@ -86,7 +86,7 @@ int main(int argc, char **argv){
                 }
                 else{
 
-                    printf("buff = %s\n", buff);
+                    printf("buff = %s len = %d\n", buff, strlen(buff));
                     if(!strcmp(buff, "close\n")){
 
                         shutdown(Iter, SHUT_RDWR);
