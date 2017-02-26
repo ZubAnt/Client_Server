@@ -7,78 +7,65 @@
 #include <string.h>
 #include <unistd.h>
 
-void err(const char *msg){
-    perror(msg);
+#define SizeBuff 1024
+
+static void print_err_and_exit(const char *msg, int line)
+{
+    printf("ERROR: %s, LINE = %d\n", msg, line);
     exit(1);
+}
+
+static void init_server_sockaddr(struct sockaddr_in *server, int port_nomber)
+{
+    bzero((char *) server, sizeof(server));
+    server->sin_family = AF_INET;
+    server->sin_addr.s_addr = INADDR_ANY;
+    server->sin_port = htons(port_nomber);
 }
 
 int main(int argc, char *argv[])
 {
-    if(argc != 2){
+    if(argc != 2){ print_err_and_exit("No port provided", __LINE__); } // second arg must be port number
+    printf("Server running...\n");
 
-        err("ERROR, no port provided\n");
-    }
-
-    printf("server running...\n");
-
-    size_t SizeBuff = 1024;
     char buff[SizeBuff];
-
-    int server_fd = 0;
-    int accept_fd = 0;
-    int port = 0;
-    int numb_read = 0;
-    int numb_write = 0;
-
     struct sockaddr_in server, client;
-    socklen_t client_len = sizeof(client);
+    socklen_t SockAddr_len = sizeof(client);
 
-    server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int MasterSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(MasterSocket < 0){ print_err_and_exit("Opening socket", __LINE__); }
 
-    if(server_fd < 0){
-
-        err("ERROR opening socket\n");
-    }
-
-    port = atoi(argv[1]);
-//    port = 3047;
-    bzero((char *) &server, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(port);
-    bind(server_fd, (const struct sockaddr *) &server, sizeof(server));
-    listen(server_fd, 5);
-
-    accept_fd = accept(server_fd, (struct sockaddr *) &client, &client_len);
-    if(accept_fd < 0){
-
-        err("ERROR on accept\n");
-    }
+    int port = atoi(argv[1]);
+    init_server_sockaddr(&server, port);
+    bind(MasterSocket, (const struct sockaddr *) &server, sizeof(server));
+    listen(MasterSocket, 5);
 
     while(1){
 
+        int SlaveSocket = accept(MasterSocket, (struct sockaddr *) &client, &SockAddr_len);
+        if(SlaveSocket < 0){ print_err_and_exit("No accept", __LINE__); }
+
         bzero(buff, SizeBuff);
-        numb_read = read(accept_fd, buff, SizeBuff);
-
-        if(numb_read < 0){
-
-            err("ERROR reading from socket\n");
-        }
+        int n_read = recv(SlaveSocket, buff, SizeBuff, MSG_NOSIGNAL);
+        if(n_read < 0){ print_err_and_exit("NO reading from socket", __LINE__); }
 
         if(!strcmp(buff, "close")){
 
+            shutdown(SlaveSocket, SHUT_RDWR);
+            close(SlaveSocket);
             break;
         }
+        else{ printf("Receive %d bytes; Message: %s\n", n_read, buff); }
 
-        numb_write = write(accept_fd, buff, strlen(buff));
-        if(numb_write < 0){
+        int n_write = send(SlaveSocket, buff, strlen(buff), MSG_NOSIGNAL);
+        if(n_write < 0){ print_err_and_exit("NO writing to socket", __LINE__); }
+        else{ printf("Send %d bytes; Message: %s\n", n_read, buff); }
 
-            err("ERROR writing to socket");
-        }
+        shutdown(SlaveSocket, SHUT_RDWR);
+        close(SlaveSocket);
     }
 
-    close(accept_fd);
-    close(server_fd);
+    close(MasterSocket);
 
     return 0;
 }
