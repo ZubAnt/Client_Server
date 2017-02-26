@@ -49,17 +49,17 @@ int main(int argc, char *argv[])
         int n_read = recv(SlaveSocket, buff, SizeBuff, MSG_NOSIGNAL);
         if(n_read < 0){ print_err_and_exit("NO reading from socket", __LINE__); }
 
-        if(!strcmp(buff, "close")){
+        if(!strcmp(buff, "close\n")){
 
             shutdown(SlaveSocket, SHUT_RDWR);
             close(SlaveSocket);
             break;
         }
-        else{ printf("Receive %d bytes; Message: %s\n", n_read, buff); }
+        else{ printf("Recv %d bytes\nMessage: %s\n", n_read, buff); }
 
         int n_write = send(SlaveSocket, buff, strlen(buff), MSG_NOSIGNAL);
         if(n_write < 0){ print_err_and_exit("NO writing to socket", __LINE__); }
-        else{ printf("Send %d bytes; Message: %s\n", n_read, buff); }
+        else{ printf("Send %d bytes\nMessage: %s\n", n_read, buff); }
 
         shutdown(SlaveSocket, SHUT_RDWR);
         close(SlaveSocket);
