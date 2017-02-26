@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     int port = atoi(argv[1]);
     init_server_sockaddr(&server, port);
     bind(MasterSocket, (const struct sockaddr *) &server, sizeof(server));
-    listen(MasterSocket, 5);
+    listen(MasterSocket, SOMAXCONN);
 
     while(1){
 
