@@ -86,7 +86,12 @@ int main(int argc, char **argv){
                 }
                 else{
 
-                    int n_send = send(Iter, buff, SizeBuff, MSG_NOSIGNAL);
+                    if(!strcmp(buff, "close\n")){
+
+                        shutdown(Iter, SHUT_RDWR);
+                        close(Iter);
+                    }
+                    else{ int n_send = send(Iter, buff, SizeBuff, MSG_NOSIGNAL); }
                 }
             }
         }
