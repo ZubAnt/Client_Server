@@ -86,6 +86,7 @@ int main(int argc, char **argv){
                 }
                 else{
 
+                    printf("buff = %s\n", buff);
                     if(!strcmp(buff, "close\n")){
 
                         shutdown(Iter, SHUT_RDWR);
