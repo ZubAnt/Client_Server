@@ -2,15 +2,15 @@
 
 Создает сокет и возвращает дескриптор сокета.
 
-int socket(int domain, int type, int protocol);\n
-Домен (domain) может быть следующим:
-AF_INET - для IPv4,
-AF_INET6 - для IPv6,
-AF_UNIX - для Unix-сокетов ( https://en.wikipedia.org/wiki/Unix_domain_socket ).
-Тип (type) может быть следующий:
-SOCK_STREAM - для TCP,
-SOCK_DGRAM - для UDP.
-Протокол (proto) приравниваем к нулю - автоматический выбор.
+int socket(int domain, int type, int protocol);<br />
+Домен (domain) может быть следующим:<br />
+AF_INET - для IPv4,<br />
+AF_INET6 - для IPv6,<br />
+AF_UNIX - для Unix-сокетов ( https://en.wikipedia.org/wiki/Unix_domain_socket ).<br />
+Тип (type) может быть следующий:<br />
+SOCK_STREAM - для TCP,<br />
+SOCK_DGRAM - для UDP.<br />
+Протокол (proto) приравниваем к нулю - автоматический выбор.<br />
 
 #bind(...)
 
