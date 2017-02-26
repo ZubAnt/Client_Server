@@ -9,3 +9,7 @@ SOURCES += \
 
 HEADERS += \
     admin.h
+
+DISTFILES += README.md
+
+DISTFILES +=
