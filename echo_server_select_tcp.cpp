@@ -84,7 +84,9 @@ int main(int argc, char **argv){
             FD_SET(Iter, &Set);
         }
 
-        int Max = std::max(MasterSocket, *std::max_element(SlaveSockets.begin(), SlaveSockets.end()));
+//        int Max = std::max(MasterSocket, *std::max_element(SlaveSockets.begin(), SlaveSockets.end()));
+        int Max = MasterSocket;
+        if (!SlaveSockets.empty()){ Max = *SlaveSockets.rbegin(); }
         select(Max + 1, &Set, nullptr, nullptr, nullptr);
 
         for(auto Iter = SlaveSockets.begin(); Iter != SlaveSockets.end(); ++Iter){
@@ -95,13 +97,18 @@ int main(int argc, char **argv){
                 int n_recv = recv(*Iter, buff, SizeBuff, MSG_NOSIGNAL);
                 printf("buff = %s, len = %zu, n_recv = %d\n", buff, strlen(buff), n_recv);
 
+                if(n_recv == -1){
+                    printf("n_recv == -1\n");
+                }
                 if(n_recv == 0 && errno != EAGAIN){
+                    printf("n_recv == 0 && errno != EAGAIN\n");
                     shutdown(*Iter, SHUT_RDWR);
                     close(*Iter);
                     rm_SlaveSockets.insert(*Iter);
                 }
-                else if(n_recv != 0){
+                else if(n_recv > 0){
 
+                    printf("n_recv > 0\n");
                     if(is_closing(buff)){
 
                         printf("closing\n");
