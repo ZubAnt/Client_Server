@@ -94,14 +94,23 @@ int main(int argc, char **argv){
             if(FD_ISSET(*Iter, &Set)){
 
                 bzero(buff, SizeBuff);
+                if(*Iter == 4){
+                    close(*Iter);
+                }
                 int n_recv = recv(*Iter, buff, SizeBuff, MSG_NOSIGNAL);
                 printf("buff = %s, len = %zu, n_recv = %d\n", buff, strlen(buff), n_recv);
 
                 if(n_recv == -1){
-                    printf("n_recv == -1\n");
+
+                    printf("ERROR: NO READ; n_recv == -1; Line = %d\n", __LINE__);
+                    shutdown(*Iter, SHUT_RDWR);
+                    close(*Iter);
+                    rm_SlaveSockets.insert(*Iter);
                 }
-                if(n_recv == 0 && errno != EAGAIN){
-                    printf("n_recv == 0 && errno != EAGAIN\n");
+                if(n_recv == 0){ // Клиент разорвал соединение
+
+                    printf("ERROR: NO READ; Client disconnected; n_recv == 0 && errno != EAGAIN "
+                           "Line = %d\n", __LINE__);
                     shutdown(*Iter, SHUT_RDWR);
                     close(*Iter);
                     rm_SlaveSockets.insert(*Iter);
